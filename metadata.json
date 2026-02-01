@@ -1,0 +1,7 @@
+{
+  "name": "리워드보이스 (RewardVoice)",
+  "description": "설문 등록 수수료 0원, 참여자 가치 보상 플랫폼. 의뢰자가 직접 보상을 설계하고 참여자에게 100% 전달합니다.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
