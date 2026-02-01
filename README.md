@@ -5,30 +5,29 @@ React + Vite + Tailwind CSS 기반의 리워드 음성 인식 애플리케이션
 ## 🌐 배포 URL
 
 - **프로덕션**: https://qa0202.pages.dev
-- **최신 배포**: https://fe361ef0.qa0202.pages.dev
-- **커스텀 도메인**: feezone.store (연결 완료)
+- **최신 배포**: https://5943993d.qa0202.pages.dev
+- **커스텀 도메인**: https://feezone.store (연결 완료)
 - **GitHub 저장소**: https://github.com/langsb16-collab/QA0201
 
 ## ✅ 최근 수정 사항
 
-### 🔧 Tailwind CSS 프로덕션 빌드 적용 (2026-02-01)
+### 🔧 Import Map 충돌 해결 (2026-02-01)
 
-**문제**: Tailwind CDN 사용으로 인한 프로덕션 환경 CSS 미적용 (흰 화면)
-- CDN 방식은 런타임 의존으로 Cloudflare Pages에서 불안정
-- 콘솔 경고: "cdn.tailwindcss.com should not be used in production"
+**문제**: Vite 빌드와 import map 충돌로 인한 React 앱 렌더링 실패
+- import map은 브라우저가 런타임에 모듈을 로드하는 방식
+- Vite는 이미 모든 의존성을 번들링하여 하나의 JS 파일로 생성
+- 두 방식이 충돌하여 React 앱이 실행되지 않음
 
 **해결**:
-- ✅ Tailwind CSS v3.4.0 빌드 방식으로 전환
-- ✅ PostCSS 설정 추가 (`postcss.config.js`)
-- ✅ Tailwind 설정 파일 생성 (`tailwind.config.js`)
-- ✅ CSS 진입점 생성 (`src/index.css`)
-- ✅ 빌드 시 CSS 파일 생성 (37.11 kB)
-- ✅ Cloudflare Pages 재배포 완료
+- ✅ index.html에서 import map 제거
+- ✅ Vite의 번들링 방식만 사용
+- ✅ React, Recharts, Google Genai 모두 빌드에 포함
+- ✅ 정상적인 React 앱 렌더링 확인
 
-**결과**:
-- 빈 화면 문제 해결
-- 프로덕션 환경에서 정상 작동
-- 빌드된 CSS로 빠른 로딩 속도
+### 🎨 Tailwind CSS 프로덕션 빌드 적용 (2026-02-01)
+
+**문제**: Tailwind CDN 사용으로 인한 프로덕션 환경 CSS 미적용
+**해결**: Tailwind CSS v3.4.0 빌드 방식으로 전환 ✅
 
 ## ✨ 주요 기능
 
@@ -37,6 +36,7 @@ React + Vite + Tailwind CSS 기반의 리워드 음성 인식 애플리케이션
 - Recharts를 활용한 데이터 시각화
 - Tailwind CSS 기반 반응형 디자인 (프로덕션 빌드)
 - TypeScript 지원
+- localStorage 기반 데이터 관리
 
 ## 📦 기술 스택
 
@@ -58,7 +58,7 @@ npm install
 # 개발 서버 시작 (포트 3000)
 npm run dev
 
-# 프로덕션 빌드 (Tailwind CSS 컴파일 포함)
+# 프로덕션 빌드 (Tailwind CSS 컴파일 + React 번들링)
 npm run build
 
 # 빌드 미리보기
@@ -92,38 +92,26 @@ npx wrangler pages deploy dist --project-name qa0202
 2. **빌드 출력**:
    ```
    dist/assets/index-[hash].css  (약 37 kB, gzip: 6.68 kB)
+   dist/assets/index-[hash].js   (약 918 kB, gzip: 247 kB)
    ```
 
 3. **자동 적용**:
-   - Vite가 `index.tsx`에서 임포트된 CSS를 자동 처리
-   - HTML에 `<link>` 태그 자동 삽입
-
-### ⚠️ 중요: CDN 방식 사용 금지
-
-```html
-<!-- ❌ 사용하지 마세요 (프로덕션에서 작동하지 않음) -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- ✅ 빌드된 CSS 사용 (Vite가 자동 처리) -->
-import './src/index.css' // index.tsx에서
-```
+   - Vite가 모든 의존성을 번들링
+   - HTML에 `<script>` 및 `<link>` 태그 자동 삽입
 
 ## 🔗 커스텀 도메인 (feezone.store)
 
 도메인 연결이 완료되었습니다!
 
-### Cloudflare Dashboard 설정 확인
+### 접속 URL
+- **메인 도메인**: https://feezone.store
+- **Cloudflare Pages**: https://qa0202.pages.dev
 
-1. **Cloudflare Dashboard**: https://dash.cloudflare.com
+### Cloudflare Dashboard 설정
+1. **Dashboard**: https://dash.cloudflare.com
 2. **Pages 프로젝트**: Workers & Pages > qa0202
-3. **Custom domains**: feezone.store 연결 완료
-4. **DNS 레코드**:
-   - Type: `CNAME`
-   - Name: `@` 또는 `feezone.store`
-   - Target: `qa0202.pages.dev`
-   - Proxy: Enabled (🟠)
-
-5. **SSL/TLS**: 자동 활성화됨
+3. **Custom domains**: feezone.store 연결 완료 ✅
+4. **SSL/TLS**: 자동 활성화 완료 ✅
 
 ## 📁 프로젝트 구조
 
@@ -132,8 +120,17 @@ webapp/
 ├── src/
 │   └── index.css          # Tailwind CSS 진입점
 ├── components/            # React 컴포넌트
+│   └── Layout.tsx
 ├── screens/              # 화면 컴포넌트
+│   ├── AdminDashboard.tsx
+│   ├── AdminLogin.tsx
+│   ├── AdminSurveyCreate.tsx
+│   ├── BusinessDashboard.tsx
+│   ├── CitizenSurvey.tsx
+│   └── PublicResults.tsx
 ├── services/             # API 서비스
+│   ├── storageService.ts
+│   └── blockchainService.ts
 ├── App.tsx               # 메인 앱 컴포넌트
 ├── index.tsx             # 엔트리 포인트
 ├── index.html            # HTML 템플릿
@@ -150,7 +147,7 @@ webapp/
 
 프로젝트에서 사용하는 환경 변수:
 
-- `GEMINI_API_KEY`: Google Gemini API 키
+- `GEMINI_API_KEY`: Google Gemini AI API 키
 
 로컬 개발 시 `.env` 파일에 추가:
 
@@ -175,16 +172,27 @@ GEMINI_API_KEY=your_api_key_here
 - **모던 React**: 최신 React 19 기능 활용
 - **타입 안전성**: TypeScript로 완벽한 타입 체크
 - **빠른 개발**: Vite의 HMR(Hot Module Replacement)
-- **프로덕션 빌드**: Tailwind CSS 빌드 방식으로 안정적인 스타일링
-- **AI 통합**: Google Gemini AI 연동
-- **반응형 디자인**: 모바일/태블릿/데스크톱 지원
+- **프로덕션 빌드**: 모든 의존성 번들링으로 안정적인 배포
+- **반응형 디자인**: Tailwind CSS로 모바일/태블릿/데스크톱 지원
 - **글로벌 배포**: Cloudflare Pages로 전 세계 엣지 네트워크 활용
+- **localStorage**: 서버 없이 클라이언트 사이드 데이터 관리
 
 ## 🐛 문제 해결
 
-### 흰 화면 / CSS 미적용
+### React 앱이 렌더링되지 않음 / 빈 화면
 
-**증상**: 배포 후 흰 화면만 표시되고 콘솔에 Tailwind CDN 경고
+**증상**: 배포 후 빈 화면만 표시되고 React 컴포넌트가 로드되지 않음
+
+**원인**: Import map과 Vite 빌드 시스템 충돌
+- Import map은 브라우저가 런타임에 모듈을 로드
+- Vite는 빌드 시 모든 모듈을 번들링
+- 두 방식이 충돌하여 React가 실행되지 않음
+
+**해결**: ✅ 이미 적용됨 - Import map 제거, Vite 번들링만 사용
+
+### Tailwind CSS 미적용
+
+**증상**: 스타일이 적용되지 않고 흰 화면 표시
 
 **원인**: Tailwind CDN은 프로덕션 환경에서 불안정
 
@@ -202,9 +210,21 @@ npm install
 npm run build
 ```
 
-## 📊 데이터 시각화
+## 📊 애플리케이션 기능
 
-Recharts 라이브러리를 사용하여 다양한 차트와 그래프를 제공합니다.
+### 사용자 유형
+1. **시민 참여자**: 설문에 응답하고 보상 받기
+2. **일반인 의뢰자**: 개인 프로젝트 설문 생성
+3. **소상공인**: 시장 조사 및 매출 분석
+4. **지자체**: 정책 수립 및 시민 여론 조사
+
+### 핵심 기능
+- 설문 생성 및 관리
+- 보상 시스템 (모바일 상품권, 지역 상품권, USDT)
+- 자동 추첨 시스템 (Fisher-Yates 알고리즘)
+- 데이터 시각화 (Recharts)
+- 블록체인 트랜잭션 검증
+- localStorage 기반 데이터 저장
 
 ## 🔐 보안
 
@@ -212,6 +232,8 @@ Recharts 라이브러리를 사용하여 다양한 차트와 그래프를 제공
 - 환경 변수로 민감한 정보 관리
 - TypeScript로 타입 안전성 보장
 - Cloudflare 보안 기능 활용
+- IP 중복 참여 제한
+- 불성실 응답 자동 제외
 
 ## 📝 라이선스
 
@@ -225,11 +247,15 @@ Recharts 라이브러리를 사용하여 다양한 차트와 그래프를 제공
 
 ## 📈 배포 기록
 
+### v1.2.0 (2026-02-01)
+- ✅ Import map 제거 (Vite 빌드 충돌 해결)
+- ✅ React 앱 정상 렌더링 확인
+- ✅ 모든 의존성 번들링 완료
+
 ### v1.1.0 (2026-02-01)
 - ✅ Tailwind CDN → 빌드 방식 전환
 - ✅ 프로덕션 환경 CSS 문제 해결
 - ✅ PostCSS 설정 추가
-- ✅ 빌드 크기 최적화
 
 ### v1.0.0 (2026-02-01)
 - ✅ Cloudflare Pages 초기 배포
@@ -241,5 +267,7 @@ Recharts 라이브러리를 사용하여 다양한 차트와 그래프를 제공
 **배포 상태**:
 - ✅ Cloudflare Pages 배포 완료
 - ✅ Tailwind CSS 프로덕션 빌드 적용
+- ✅ Import map 충돌 해결
+- ✅ React 앱 정상 작동
 - ✅ 커스텀 도메인 연결 완료 (feezone.store)
 - ✅ 모든 기능 정상 작동
