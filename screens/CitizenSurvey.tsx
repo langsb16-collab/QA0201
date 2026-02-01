@@ -15,12 +15,10 @@ const CitizenSurvey: React.FC<{ onComplete: () => void }> = ({ onComplete }) => 
 
   useEffect(() => {
     const s = storageService.getActiveSurvey();
-    if (s) {
-      setActiveSurvey(s);
-      if (storageService.hasParticipated(s.id)) {
-        setAlreadyVoted(true);
-        storageService.recordBlockedAttempt(s.id);
-      }
+    setActiveSurvey(s || null);
+    if (s && storageService.hasParticipated(s.id)) {
+      setAlreadyVoted(true);
+      storageService.recordBlockedAttempt(s.id);
     }
   }, []);
 
@@ -74,9 +72,10 @@ const CitizenSurvey: React.FC<{ onComplete: () => void }> = ({ onComplete }) => 
     <p className="text-gray-400 font-bold mt-4">데이터 무결성을 위해 중복 참여는 제한됩니다.</p>
   </div>;
   
-  if (!activeSurvey) return <div className="text-center py-48 animate-pulse">
-    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-8"></div>
-    <p className="text-xs font-black text-indigo-400 uppercase tracking-widest">Loading Active Campaign</p>
+  if (!activeSurvey) return <div className="text-center py-48">
+    <div className="text-7xl mb-10">📋</div>
+    <h2 className="text-4xl font-black text-gray-900 tracking-tighter mb-4">진행 중인 캠페인이 없습니다</h2>
+    <p className="text-gray-400 font-bold">관리자가 새로운 설문을 활성화할 때까지 기다려주세요.</p>
   </div>;
 
   // Step 0: Intro & Reward
