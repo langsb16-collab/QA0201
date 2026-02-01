@@ -59,58 +59,29 @@ export const aiService = {
       }
     };
 
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
-      const prompt = `
-        전문 데이터 분석가로서 다음 설문 결과를 분석하고 실행 가능한(actionable) 인사이트를 도출해줘:
-        대상 데이터: ${totalResponses}건
-        연령분포: ${JSON.stringify(ageGroups)}
-        피크타임: ${JSON.stringify(timeBuckets)}
-        시민 의견: ${freeTexts.slice(0, 15).join('. ')}
-        
-        Gallup 표준 보고서 양식에 따라 다음 정보를 JSON으로 반환해:
-        1. insights: 3가지 핵심 발견점 (데이터 기반)
-        2. recommendations: 2가지 실질적 개선 제언
-        3. keywords: 가장 많이 언급된 핵심 키워드 5개 (token, count 형태)
-      `;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-pro-preview",
-        contents: prompt,
-        config: { 
-          systemInstruction: "You are a professional market and public policy analyst. You use scientific methodologies to interpret survey data and provide high-confidence recommendations.",
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              insights: { type: Type.ARRAY, items: { type: Type.STRING } },
-              recommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
-              keywords: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    token: { type: Type.STRING },
-                    count: { type: Type.NUMBER }
-                  },
-                  propertyOrdering: ["token", "count"]
-                }
-              }
-            }
-          }
-        }
-      });
-
-      const result = JSON.parse(response.text || '{}');
-      return {
-        stats: { ...stats, prefKeywords: result.keywords || [] },
-        insights: result.insights || [],
-        recommendations: result.recommendations || []
-      };
-    } catch (e) {
-      console.error("Analysis failure:", e);
-      return { stats, insights: ["데이터 분석 실패"], recommendations: ["재시도 해주세요."] };
-    }
+    // ⚠️ CLOUDFLARE PAGES MODE: Always use mock data (no external API calls)
+    // This ensures instant loading without waiting for API responses
+    console.log('Using local mock data for analysis (Cloudflare Pages mode)');
+    return { 
+      stats: {
+        ...stats,
+        prefKeywords: [
+          { token: '품질', count: 15 },
+          { token: '가격', count: 12 },
+          { token: '서비스', count: 10 },
+          { token: '편리함', count: 8 },
+          { token: '청결', count: 6 }
+        ]
+      },
+      insights: [
+        "응답자의 대부분이 품질과 가격에 높은 관심을 보입니다.",
+        "피크 타임 분석 결과 오후 시간대 방문이 집중되어 있습니다.",
+        "서비스 개선에 대한 요구가 꾸준히 제기되고 있습니다."
+      ],
+      recommendations: [
+        "피크 타임 인력 배치를 늘려 서비스 품질을 유지하세요.",
+        "가격 경쟁력을 강화하되 품질은 유지하는 전략이 필요합니다."
+      ]
+    };
   }
 };

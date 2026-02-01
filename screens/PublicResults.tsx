@@ -19,8 +19,12 @@ const PublicResults: React.FC<{ surveyId?: string; onBack: () => void }> = ({ su
         const s = storageService.getSurveyById(targetId);
         setSurvey(s);
         const responses = storageService.getResponsesBySurvey(targetId);
-        const result = await aiService.analyzeResponses(responses);
-        setAnalysis(result);
+        try {
+          const result = await aiService.analyzeResponses(responses);
+          setAnalysis(result);
+        } catch (error) {
+          console.error('AI analysis failed:', error);
+        }
       }
       setLoading(false);
     };

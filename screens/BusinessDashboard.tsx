@@ -17,8 +17,13 @@ const BusinessDashboard: React.FC = () => {
       if (activeSurvey) {
         const responses = storageService.getResponsesBySurvey(activeSurvey.id);
         if (responses.length > 0) {
-          const result = await aiService.analyzeResponses(responses);
-          setAnalysis(result);
+          try {
+            const result = await aiService.analyzeResponses(responses);
+            setAnalysis(result);
+          } catch (error) {
+            console.error('AI analysis failed:', error);
+            // Set null to show "no data" screen
+          }
         }
       }
       setLoading(false);
